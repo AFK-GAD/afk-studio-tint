@@ -27,3 +27,6 @@ create unique index if not exists bookings_date_time_unique
 
 -- Enable row level security; only server (service role key) writes/reads directly
 alter table bookings enable row level security;
+
+-- Migration: run this too if you already created the bookings table before this update
+alter table bookings add column if not exists total_sqft numeric;

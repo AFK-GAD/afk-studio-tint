@@ -9,7 +9,7 @@ function getPassword() {
 }
 
 async function loadBookings() {
-  bookingsBody.innerHTML = '<tr><td colspan="12" class="hint">Loading...</td></tr>';
+  bookingsBody.innerHTML = '<tr><td colspan="13" class="hint">Loading...</td></tr>';
   try {
     const res = await fetch('/api/list-bookings', {
       headers: { 'x-admin-password': getPassword() },
@@ -24,13 +24,13 @@ async function loadBookings() {
     const data = await res.json();
     renderBookings(data.bookings || []);
   } catch (err) {
-    bookingsBody.innerHTML = `<tr><td colspan="12" class="hint">Couldn't load appointments — check your connection.</td></tr>`;
+    bookingsBody.innerHTML = `<tr><td colspan="13" class="hint">Couldn't load appointments — check your connection.</td></tr>`;
   }
 }
 
 function renderBookings(bookings) {
   if (!bookings.length) {
-    bookingsBody.innerHTML = '<tr><td colspan="12" class="hint">No appointments yet.</td></tr>';
+    bookingsBody.innerHTML = '<tr><td colspan="13" class="hint">No appointments yet.</td></tr>';
     return;
   }
 
@@ -44,6 +44,7 @@ function renderBookings(bookings) {
       <td>${[b.vehicle_make, b.vehicle_model].filter(Boolean).join(' ') || '—'}</td>
       <td>${b.package_label}</td>
       <td>${b.vlt}</td>
+      <td>${b.total_sqft ? Number(b.total_sqft).toFixed(1) + ' sqft' : '—'}</td>
       <td>$${b.price}</td>
       <td><span class="status-pill status-${b.payment_status}">${b.payment_status.replace(/_/g, ' ')}</span></td>
       <td>${b.notes || '—'}</td>

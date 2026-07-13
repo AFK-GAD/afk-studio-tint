@@ -53,7 +53,8 @@
   <section class="services" id="services">
     <div class="wrap">
       <p class="eyebrow">Spec sheet</p>
-      <h2>Pick your package</h2>
+      <h2>Pick your film</h2>
+      <p class="hint" style="margin: -16px 0 24px;">Priced per square foot of glass — pick your coverage and vehicle in the booking form for an exact quote.</p>
       <div class="spec-grid" id="specGrid"><!-- injected by script.js --></div>
     </div>
   </section>
@@ -67,35 +68,17 @@
       <div class="wizard" id="wizard">
 
         <div class="wizard-steps">
-          <span class="step active" data-step="1">1. Package</span>
-          <span class="step" data-step="2">2. Vehicle</span>
+          <span class="step active" data-step="1">1. Vehicle</span>
+          <span class="step" data-step="2">2. Coverage &amp; film</span>
           <span class="step" data-step="3">3. Date &amp; time</span>
           <span class="step" data-step="4">4. Your info</span>
           <span class="step" data-step="5">5. Confirm</span>
         </div>
 
-        <!-- Step 1: package + VLT -->
+        <!-- Step 1: vehicle -->
         <div class="wizard-panel active" data-panel="1">
-          <label class="field-label">Package</label>
-          <div class="pkg-choices" id="pkgChoices"></div>
-
-          <label class="field-label">VLT %</label>
-          <div class="vlt-choices" id="vltChoices"></div>
-
-          <div class="wizard-actions">
-            <button class="btn btn-primary" id="toStep2" disabled>Continue</button>
-          </div>
-        </div>
-
-        <!-- Step 2: vehicle -->
-        <div class="wizard-panel" data-panel="2">
-          <label class="field-label" for="vehicleType">Vehicle type</label>
-          <select id="vehicleType" class="input">
-            <option value="">Select...</option>
-            <option value="sedan">Sedan / coupe</option>
-            <option value="suv">SUV / crossover</option>
-            <option value="truck">Pickup / van</option>
-          </select>
+          <label class="field-label">Vehicle type</label>
+          <div class="pkg-choices" id="vehicleChoices"></div>
 
           <label class="field-label" for="vehicleMake">Make</label>
           <input class="input" id="vehicleMake" placeholder="e.g. Acura" />
@@ -104,8 +87,27 @@
           <input class="input" id="vehicleModel" placeholder="e.g. RSX" />
 
           <div class="wizard-actions">
+            <button class="btn btn-primary" id="toStep2" disabled>Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 2: coverage + film + VLT -->
+        <div class="wizard-panel" data-panel="2">
+          <label class="field-label">Coverage</label>
+          <div class="pkg-choices" id="coverageChoices"></div>
+          <div class="zone-choices" id="zoneChoices"></div>
+
+          <label class="field-label">Film type</label>
+          <div class="pkg-choices" id="filmChoices"></div>
+
+          <label class="field-label">VLT %</label>
+          <div class="vlt-choices" id="vltChoices"></div>
+
+          <div class="price-preview" id="pricePreview">Pick a vehicle, coverage, film, and VLT to see your price.</div>
+
+          <div class="wizard-actions">
             <button class="btn btn-ghost" data-back="1">Back</button>
-            <button class="btn btn-primary" id="toStep3">Continue</button>
+            <button class="btn btn-primary" id="toStep3" disabled>Continue</button>
           </div>
         </div>
 

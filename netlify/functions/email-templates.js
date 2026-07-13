@@ -35,6 +35,7 @@ function ownerNotificationHtml(booking) {
         <tr><td style="padding: 6px 0; color: #777;">Service</td><td style="padding: 6px 0; text-align: right;">${esc(booking.packageLabel)} (${esc(booking.vlt)})</td></tr>
         <tr><td style="padding: 6px 0; color: #777;">Vehicle</td><td style="padding: 6px 0; text-align: right;">${esc(booking.vehicleMake)} ${esc(booking.vehicleModel)} (${esc(booking.vehicleType) || 'n/a'})</td></tr>
         <tr><td style="padding: 6px 0; color: #777;">Date</td><td style="padding: 6px 0; text-align: right;">${esc(booking.appointmentDate)} at ${esc(booking.appointmentTime)}</td></tr>
+        <tr><td style="padding: 6px 0; color: #777;">Tint needed</td><td style="padding: 6px 0; text-align: right;"><strong>${esc(booking.totalSqft)} sqft</strong></td></tr>
         <tr><td style="padding: 6px 0; color: #777;">Price</td><td style="padding: 6px 0; text-align: right;">$${esc(booking.price)} XCD — in person</td></tr>
         ${booking.notes ? `<tr><td style="padding: 6px 0; color: #777;">Notes</td><td style="padding: 6px 0; text-align: right;">${esc(booking.notes)}</td></tr>` : ''}
       </table>

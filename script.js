@@ -1,35 +1,41 @@
-// ============ DATA — edit prices/packages here ============
-const PACKAGES = [
+// ============ DATA — edit sqft/prices here to match your real numbers ============
+// Square footage estimates per window zone, by vehicle category. These are starting
+// estimates — adjust them once you've measured a few real jobs of each vehicle type.
+const VEHICLES = [
   {
-    id: 'ceramic-ir-full',
-    label: 'Ceramic IR — Full Vehicle',
-    price: 650,
-    specs: { coverage: 'All windows', heatReject: 'Highest', warranty: 'Lifetime' },
+    id: 'sedan',
+    label: 'Sedan / Coupe',
+    sqft: { windshieldStrip: 2, front2: 6, rear2: 6, rearWindshield: 7 },
   },
   {
-    id: 'ceramic-full',
-    label: 'Ceramic — Full Vehicle',
-    price: 500,
-    specs: { coverage: 'All windows', heatReject: 'High', warranty: 'Lifetime' },
+    id: 'suv-small',
+    label: 'Small SUV / Crossover',
+    sqft: { windshieldStrip: 2.5, front2: 7, rear2: 10, rearWindshield: 8 },
   },
   {
-    id: 'carbon-full',
-    label: 'Carbon — Full Vehicle',
-    price: 350,
-    specs: { coverage: 'All windows', heatReject: 'Moderate', warranty: '5 years' },
+    id: 'suv-large',
+    label: 'Large SUV / Van',
+    sqft: { windshieldStrip: 3, front2: 8, rear2: 14, rearWindshield: 9 },
   },
   {
-    id: 'front-strip',
-    label: 'Front Two + Windshield Strip',
-    price: 150,
-    specs: { coverage: 'Front windows + strip', heatReject: 'Moderate', warranty: '5 years' },
+    id: 'truck',
+    label: 'Pickup Truck',
+    sqft: { windshieldStrip: 2, front2: 7, rear2: 5, rearWindshield: 6 },
   },
-  {
-    id: 'removal',
-    label: 'Tint Removal',
-    price: 120,
-    specs: { coverage: 'All windows', heatReject: '—', warranty: '—' },
-  },
+];
+
+const ZONES = [
+  { id: 'windshieldStrip', label: 'Windshield Strip' },
+  { id: 'front2', label: 'Front Two Windows' },
+  { id: 'rear2', label: 'Rear Two Windows' },
+  { id: 'rearWindshield', label: 'Rear Windshield' },
+];
+
+// Price per square foot of film, by film type — edit to match your real cost + margin.
+const FILM_TYPES = [
+  { id: 'carbon', label: 'Carbon', pricePerSqft: 17, heatReject: 'Moderate', warranty: '5 years' },
+  { id: 'ceramic', label: 'Ceramic', pricePerSqft: 24, heatReject: 'High', warranty: 'Lifetime' },
+  { id: 'ceramic-ir', label: 'Ceramic IR', pricePerSqft: 31, heatReject: 'Highest', warranty: 'Lifetime' },
 ];
 
 const VLT_OPTIONS = ['5%', '20%', '35%', '50%'];
@@ -43,13 +49,20 @@ const VLT_TIERS = [
   { max: 100, label: 'Factory-clear range' },
 ];
 
+function roundToNearest(value, step) {
+  return Math.round(value / step) * step;
+}
+
 // ============ STATE ============
 const booking = {
-  packageId: null,
-  vlt: null,
-  vehicleType: '',
+  vehicleCategory: null,
   vehicleMake: '',
   vehicleModel: '',
+  zones: [], // selected zone ids, or ['full'] for full vehicle
+  filmType: null,
+  vlt: null,
+  totalSqft: 0,
+  price: 0,
   date: '',
   time: null,
   name: '',
@@ -67,7 +80,6 @@ const vltTier = document.getElementById('vltTier');
 function updateVltDemo(value) {
   const v = Number(value);
   vltNumber.textContent = v;
-  // Lower VLT = darker film = higher overlay opacity. Map 2-70% to opacity 0.92-0.15
   const opacity = 0.92 - ((v - 2) / (70 - 2)) * 0.77;
   vltOverlay.style.opacity = opacity.toFixed(2);
   const tier = VLT_TIERS.find((t) => v <= t.max);
@@ -76,24 +88,61 @@ function updateVltDemo(value) {
 vltSlider.addEventListener('input', (e) => updateVltDemo(e.target.value));
 updateVltDemo(vltSlider.value);
 
-// ============ RENDER SPEC CARDS ============
+// ============ RENDER SPEC CARDS (film types) ============
 const specGrid = document.getElementById('specGrid');
-specGrid.innerHTML = PACKAGES.map((p) => `
+specGrid.innerHTML = FILM_TYPES.map((f) => `
   <div class="spec-card">
-    <h3>${p.label}</h3>
-    <div class="spec-price">$${p.price} XCD</div>
-    <div class="spec-row"><span>Coverage</span><span>${p.specs.coverage}</span></div>
-    <div class="spec-row"><span>Heat rejection</span><span>${p.specs.heatReject}</span></div>
-    <div class="spec-row"><span>Warranty</span><span>${p.specs.warranty}</span></div>
+    <h3>${f.label}</h3>
+    <div class="spec-price">$${f.pricePerSqft} XCD / sqft</div>
+    <div class="spec-row"><span>Heat rejection</span><span>${f.heatReject}</span></div>
+    <div class="spec-row"><span>Warranty</span><span>${f.warranty}</span></div>
   </div>
 `).join('');
 
-// ============ WIZARD: PACKAGE + VLT CHOICES ============
-const pkgChoices = document.getElementById('pkgChoices');
-pkgChoices.innerHTML = PACKAGES.map((p) => `
-  <button type="button" class="choice-btn" data-pkg="${p.id}">
-    <span class="choice-title">${p.label}</span>
-    <span class="choice-sub">$${p.price} XCD</span>
+// ============ WIZARD STEP 1: VEHICLE ============
+const vehicleChoices = document.getElementById('vehicleChoices');
+vehicleChoices.innerHTML = VEHICLES.map((v) => `
+  <button type="button" class="choice-btn" data-vehicle="${v.id}">
+    <span class="choice-title">${v.label}</span>
+  </button>
+`).join('');
+
+vehicleChoices.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-vehicle]');
+  if (!btn) return;
+  vehicleChoices.querySelectorAll('.choice-btn').forEach((b) => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  booking.vehicleCategory = btn.dataset.vehicle;
+  document.getElementById('toStep2').disabled = false;
+});
+
+// ============ WIZARD STEP 2: COVERAGE + FILM + VLT ============
+const coverageChoices = document.getElementById('coverageChoices');
+coverageChoices.innerHTML = `
+  <button type="button" class="choice-btn" data-coverage="full">
+    <span class="choice-title">Full Vehicle</span>
+    <span class="choice-sub">Every window</span>
+  </button>
+  <button type="button" class="choice-btn" data-coverage="custom">
+    <span class="choice-title">Choose Windows</span>
+    <span class="choice-sub">Pick specific zones</span>
+  </button>
+`;
+
+const zoneChoices = document.getElementById('zoneChoices');
+zoneChoices.innerHTML = ZONES.map((z) => `
+  <label class="zone-choice" data-zone="${z.id}">
+    <input type="checkbox" value="${z.id}" />
+    ${z.label}
+  </label>
+`).join('');
+zoneChoices.style.display = 'none';
+
+const filmChoices = document.getElementById('filmChoices');
+filmChoices.innerHTML = FILM_TYPES.map((f) => `
+  <button type="button" class="choice-btn" data-film="${f.id}">
+    <span class="choice-title">${f.label}</span>
+    <span class="choice-sub">$${f.pricePerSqft}/sqft</span>
   </button>
 `).join('');
 
@@ -104,17 +153,36 @@ vltChoices.innerHTML = VLT_OPTIONS.map((v) => `
   </button>
 `).join('');
 
-function checkStep1() {
-  document.getElementById('toStep2').disabled = !(booking.packageId && booking.vlt);
-}
-
-pkgChoices.addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-pkg]');
+coverageChoices.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-coverage]');
   if (!btn) return;
-  pkgChoices.querySelectorAll('.choice-btn').forEach((b) => b.classList.remove('selected'));
+  coverageChoices.querySelectorAll('.choice-btn').forEach((b) => b.classList.remove('selected'));
   btn.classList.add('selected');
-  booking.packageId = btn.dataset.pkg;
-  checkStep1();
+
+  if (btn.dataset.coverage === 'full') {
+    booking.zones = ['full'];
+    zoneChoices.style.display = 'none';
+    zoneChoices.querySelectorAll('input').forEach((cb) => { cb.checked = false; });
+  } else {
+    booking.zones = [];
+    zoneChoices.style.display = 'grid';
+  }
+  updatePricePreview();
+});
+
+zoneChoices.addEventListener('change', () => {
+  const checked = Array.from(zoneChoices.querySelectorAll('input:checked')).map((cb) => cb.value);
+  booking.zones = checked;
+  updatePricePreview();
+});
+
+filmChoices.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-film]');
+  if (!btn) return;
+  filmChoices.querySelectorAll('.choice-btn').forEach((b) => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  booking.filmType = btn.dataset.film;
+  updatePricePreview();
 });
 
 vltChoices.addEventListener('click', (e) => {
@@ -123,8 +191,35 @@ vltChoices.addEventListener('click', (e) => {
   vltChoices.querySelectorAll('.choice-btn').forEach((b) => b.classList.remove('selected'));
   btn.classList.add('selected');
   booking.vlt = btn.dataset.vlt;
-  checkStep1();
+  updatePricePreview();
 });
+
+function calcTotalSqft() {
+  const vehicle = VEHICLES.find((v) => v.id === booking.vehicleCategory);
+  if (!vehicle) return 0;
+  const zoneIds = booking.zones.includes('full') ? ZONES.map((z) => z.id) : booking.zones;
+  return zoneIds.reduce((sum, zId) => sum + (vehicle.sqft[zId] || 0), 0);
+}
+
+function updatePricePreview() {
+  const pricePreview = document.getElementById('pricePreview');
+  const film = FILM_TYPES.find((f) => f.id === booking.filmType);
+  const hasCoverage = booking.zones.length > 0;
+
+  if (!booking.vehicleCategory || !hasCoverage || !film || !booking.vlt) {
+    pricePreview.textContent = 'Pick your vehicle, coverage, film, and VLT to see your price.';
+    document.getElementById('toStep3').disabled = true;
+    return;
+  }
+
+  const totalSqft = calcTotalSqft();
+  const price = roundToNearest(totalSqft * film.pricePerSqft, 5);
+  booking.totalSqft = totalSqft;
+  booking.price = price;
+
+  pricePreview.innerHTML = `${totalSqft.toFixed(1)} sqft of ${film.label} — <strong>$${price} XCD</strong>`;
+  document.getElementById('toStep3').disabled = false;
+}
 
 // ============ WIZARD NAVIGATION ============
 const panels = document.querySelectorAll('.wizard-panel');
@@ -140,13 +235,12 @@ function goToPanel(name) {
   document.getElementById('wizard').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-document.getElementById('toStep2').addEventListener('click', () => goToPanel('2'));
-document.getElementById('toStep3').addEventListener('click', () => {
-  booking.vehicleType = document.getElementById('vehicleType').value;
+document.getElementById('toStep2').addEventListener('click', () => {
   booking.vehicleMake = document.getElementById('vehicleMake').value;
   booking.vehicleModel = document.getElementById('vehicleModel').value;
-  goToPanel('3');
+  goToPanel('2');
 });
+document.getElementById('toStep3').addEventListener('click', () => goToPanel('3'));
 document.getElementById('toStep4').addEventListener('click', () => goToPanel('4'));
 document.getElementById('toStep5').addEventListener('click', () => {
   booking.name = document.getElementById('custName').value.trim();
@@ -191,7 +285,6 @@ apptDate.addEventListener('change', async () => {
       bookedTimes = data.bookedTimes || [];
     }
   } catch (err) {
-    // If the API isn't deployed yet (e.g. local preview), just show all slots open.
     console.warn('Availability check failed, showing all slots as open:', err);
   }
 
@@ -211,14 +304,21 @@ timeGrid.addEventListener('click', (e) => {
 });
 
 // ============ STEP 5: SUMMARY + CONFIRM ============
+function coverageLabel() {
+  if (booking.zones.includes('full')) return 'Full Vehicle';
+  return ZONES.filter((z) => booking.zones.includes(z.id)).map((z) => z.label).join(', ');
+}
+
 function renderSummary() {
-  const pkg = PACKAGES.find((p) => p.id === booking.packageId);
+  const vehicle = VEHICLES.find((v) => v.id === booking.vehicleCategory);
+  const film = FILM_TYPES.find((f) => f.id === booking.filmType);
   document.getElementById('bookingSummary').innerHTML = `
-    <div><strong>${pkg.label}</strong> — ${booking.vlt} VLT</div>
-    <div>${booking.vehicleMake || ''} ${booking.vehicleModel || ''} (${booking.vehicleType || 'n/a'})</div>
+    <div><strong>${film.label}</strong> — ${booking.vlt} VLT</div>
+    <div>${coverageLabel()} (${booking.totalSqft.toFixed(1)} sqft)</div>
+    <div>${vehicle.label}${booking.vehicleMake ? ' — ' + booking.vehicleMake : ''} ${booking.vehicleModel || ''}</div>
     <div>${booking.date} at ${booking.time}</div>
     <div>${booking.name} — ${booking.phone}</div>
-    <div style="margin-top:8px; color: var(--ceramic);">$${pkg.price} XCD</div>
+    <div style="margin-top:8px; color: var(--ceramic);">$${booking.price} XCD</div>
   `;
 }
 
@@ -229,7 +329,8 @@ document.getElementById('submitBooking').addEventListener('click', async () => {
   submitBtn.disabled = true;
   submitBtn.textContent = 'Booking...';
 
-  const pkg = PACKAGES.find((p) => p.id === booking.packageId);
+  const vehicle = VEHICLES.find((v) => v.id === booking.vehicleCategory);
+  const film = FILM_TYPES.find((f) => f.id === booking.filmType);
 
   try {
     const res = await fetch('/api/create-booking', {
@@ -241,11 +342,12 @@ document.getElementById('submitBooking').addEventListener('click', async () => {
         email: booking.email,
         vehicleMake: booking.vehicleMake,
         vehicleModel: booking.vehicleModel,
-        vehicleType: booking.vehicleType,
-        packageId: booking.packageId,
-        packageLabel: pkg.label,
+        vehicleType: vehicle.id,
+        packageId: film.id,
+        packageLabel: `${film.label} — ${coverageLabel()}`,
         vlt: booking.vlt,
-        price: pkg.price,
+        price: booking.price,
+        totalSqft: booking.totalSqft,
         appointmentDate: booking.date,
         appointmentTime: booking.time,
         notes: booking.notes,
@@ -263,7 +365,7 @@ document.getElementById('submitBooking').addEventListener('click', async () => {
 
     document.getElementById('confirmTitle').textContent = 'Booking confirmed';
     document.getElementById('confirmBody').textContent =
-      `${pkg.label} on ${booking.date} at ${booking.time}. Pay $${pkg.price} XCD in person at your appointment.`;
+      `${film.label} — ${coverageLabel()} on ${booking.date} at ${booking.time}. Pay $${booking.price} XCD in person at your appointment.`;
     goToPanel('confirm');
   } catch (err) {
     errorEl.textContent = 'Network error — please try again.';

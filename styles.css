@@ -323,6 +323,38 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .choice-title { display: block; font-weight: 600; }
 .choice-sub { display: block; font-family: var(--mono); font-size: 0.78rem; color: var(--chrome); margin-top: 4px; }
 
+.zone-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.zone-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--charcoal);
+  border: 1px solid var(--smoke);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.zone-choice.disabled { opacity: 0.4; cursor: not-allowed; }
+.zone-choice input { accent-color: var(--ceramic); }
+
+.price-preview {
+  background: var(--charcoal);
+  border: 1px solid var(--smoke);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 20px;
+  font-family: var(--mono);
+  color: var(--chrome);
+  font-size: 0.9rem;
+}
+.price-preview strong { color: var(--ceramic); font-size: 1.2rem; }
+
 .time-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));

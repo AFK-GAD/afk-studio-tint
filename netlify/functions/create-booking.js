@@ -68,6 +68,7 @@ exports.handler = async (event) => {
     packageLabel,
     vlt,
     price,
+    totalSqft,
     appointmentDate,
     appointmentTime,
     notes,
@@ -91,6 +92,7 @@ exports.handler = async (event) => {
         package_label: packageLabel,
         vlt,
         price,
+        total_sqft: totalSqft,
         appointment_date: appointmentDate,
         appointment_time: appointmentTime,
         payment_method: 'in_person',
@@ -112,7 +114,7 @@ exports.handler = async (event) => {
     try {
       await sendBookingEmails({
         customerName, phone, email, vehicleMake, vehicleModel, vehicleType,
-        packageLabel, vlt, price, appointmentDate, appointmentTime, notes,
+        packageLabel, vlt, price, totalSqft, appointmentDate, appointmentTime, notes,
       });
     } catch (emailErr) {
       console.error('sendBookingEmails threw:', emailErr);
