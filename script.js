@@ -166,7 +166,7 @@ document.querySelectorAll('[data-back]').forEach((btn) => {
   document.getElementById(id).addEventListener('input', () => {
     const name = document.getElementById('custName').value.trim();
     const phone = document.getElementById('custPhone').value.trim();
-    document.getElementById('toStep4').disabled = !(name && phone);
+    document.getElementById('toStep5').disabled = !(name && phone);
   });
 });
 
@@ -179,7 +179,7 @@ apptDate.min = today.toISOString().split('T')[0];
 apptDate.addEventListener('change', async () => {
   booking.date = apptDate.value;
   booking.time = null;
-  document.getElementById('toStep3').disabled = true;
+  document.getElementById('toStep4').disabled = true;
   if (!booking.date) return;
 
   timeGrid.innerHTML = '<p class="hint">Loading availability...</p>';
@@ -207,7 +207,7 @@ timeGrid.addEventListener('click', (e) => {
   timeGrid.querySelectorAll('.time-slot').forEach((b) => b.classList.remove('selected'));
   btn.classList.add('selected');
   booking.time = btn.dataset.time;
-  document.getElementById('toStep3').disabled = false;
+  document.getElementById('toStep4').disabled = false;
 });
 
 // ============ STEP 5: SUMMARY + CONFIRM ============
