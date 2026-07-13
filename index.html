@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AFK Studio — Window Tint, Booked Right</title>
+<meta name="description" content="AFK Studio — professional window tinting in Antigua. Pick your film, pick your slot, book online." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <span class="brand">AFK <span class="brand-accent">STUDIO</span></span>
+    <nav class="main-nav">
+      <a href="#services">Services</a>
+      <a href="#book" class="nav-cta">Book a slot</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- HERO: the signature VLT slider -->
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">Window Tint — Antigua &amp; Barbuda</p>
+        <h1>Light in, heat out.<br>You pick the line.</h1>
+        <p class="hero-sub">Every film cuts light differently. Drag the slider to see what each VLT percentage actually looks like on glass, then book the one you want.</p>
+        <a href="#book" class="btn btn-primary">Book your appointment</a>
+      </div>
+
+      <div class="vlt-demo" aria-label="Visible light transmission demo">
+        <div class="vlt-window">
+          <div class="vlt-window-frame">
+            <div class="vlt-window-tint" id="vltOverlay"></div>
+            <div class="vlt-window-scene"></div>
+          </div>
+          <div class="vlt-readout">
+            <span class="vlt-number" id="vltNumber">20</span><span class="vlt-percent">% VLT</span>
+          </div>
+        </div>
+        <input type="range" min="2" max="70" value="20" step="1" id="vltSlider" class="vlt-slider" aria-label="VLT percentage slider">
+        <div class="vlt-tier" id="vltTier">Dark — most common choice</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="services" id="services">
+    <div class="wrap">
+      <p class="eyebrow">Spec sheet</p>
+      <h2>Pick your package</h2>
+      <div class="spec-grid" id="specGrid"><!-- injected by script.js --></div>
+    </div>
+  </section>
+
+  <!-- BOOKING WIZARD -->
+  <section class="booking" id="book">
+    <div class="wrap">
+      <p class="eyebrow">Reserve a bay</p>
+      <h2>Book your appointment</h2>
+
+      <div class="wizard" id="wizard">
+
+        <div class="wizard-steps">
+          <span class="step active" data-step="1">1. Package</span>
+          <span class="step" data-step="2">2. Vehicle</span>
+          <span class="step" data-step="3">3. Date &amp; time</span>
+          <span class="step" data-step="4">4. Your info</span>
+          <span class="step" data-step="5">5. Confirm</span>
+        </div>
+
+        <!-- Step 1: package + VLT -->
+        <div class="wizard-panel active" data-panel="1">
+          <label class="field-label">Package</label>
+          <div class="pkg-choices" id="pkgChoices"></div>
+
+          <label class="field-label">VLT %</label>
+          <div class="vlt-choices" id="vltChoices"></div>
+
+          <div class="wizard-actions">
+            <button class="btn btn-primary" id="toStep2" disabled>Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 2: vehicle -->
+        <div class="wizard-panel" data-panel="2">
+          <label class="field-label" for="vehicleType">Vehicle type</label>
+          <select id="vehicleType" class="input">
+            <option value="">Select...</option>
+            <option value="sedan">Sedan / coupe</option>
+            <option value="suv">SUV / crossover</option>
+            <option value="truck">Pickup / van</option>
+          </select>
+
+          <label class="field-label" for="vehicleMake">Make</label>
+          <input class="input" id="vehicleMake" placeholder="e.g. Acura" />
+
+          <label class="field-label" for="vehicleModel">Model</label>
+          <input class="input" id="vehicleModel" placeholder="e.g. RSX" />
+
+          <div class="wizard-actions">
+            <button class="btn btn-ghost" data-back="1">Back</button>
+            <button class="btn btn-primary" id="toStep3">Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 3: date/time -->
+        <div class="wizard-panel" data-panel="3">
+          <label class="field-label" for="apptDate">Date</label>
+          <input class="input" type="date" id="apptDate" />
+
+          <label class="field-label">Available times</label>
+          <div class="time-grid" id="timeGrid">
+            <p class="hint">Pick a date to see open slots.</p>
+          </div>
+
+          <div class="wizard-actions">
+            <button class="btn btn-ghost" data-back="2">Back</button>
+            <button class="btn btn-primary" id="toStep4" disabled>Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 4: customer info -->
+        <div class="wizard-panel" data-panel="4">
+          <label class="field-label" for="custName">Full name</label>
+          <input class="input" id="custName" placeholder="Your name" />
+
+          <label class="field-label" for="custPhone">Phone</label>
+          <input class="input" id="custPhone" placeholder="+1 (268) 000-0000" />
+
+          <label class="field-label" for="custEmail">Email (optional)</label>
+          <input class="input" id="custEmail" type="email" placeholder="you@email.com" />
+
+          <label class="field-label" for="custNotes">Notes (optional)</label>
+          <textarea class="input" id="custNotes" rows="2" placeholder="Anything we should know?"></textarea>
+
+          <div class="wizard-actions">
+            <button class="btn btn-ghost" data-back="3">Back</button>
+            <button class="btn btn-primary" id="toStep5" disabled>Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 5: confirm -->
+        <div class="wizard-panel" data-panel="5">
+          <div class="summary" id="bookingSummary"></div>
+
+          <p class="hint">Payment is collected in person at your appointment (cash or card on-site).</p>
+
+          <div class="wizard-actions">
+            <button class="btn btn-ghost" data-back="4">Back</button>
+            <button class="btn btn-primary" id="submitBooking">Confirm booking</button>
+          </div>
+
+          <p class="wizard-error" id="wizardError"></p>
+        </div>
+
+        <!-- Confirmation -->
+        <div class="wizard-panel" data-panel="confirm">
+          <div class="confirm-box">
+            <p class="confirm-mark">✓</p>
+            <h3 id="confirmTitle">Booking confirmed</h3>
+            <p id="confirmBody" class="hint"></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>AFK Studio — Antigua &amp; Barbuda</span>
+    <span class="hint">Replace this footer with your real contact details</span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

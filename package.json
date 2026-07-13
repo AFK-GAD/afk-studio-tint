@@ -1,0 +1,9 @@
+{
+  "name": "afk-studio-tint-booking",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Window tint booking site with Supabase backend, in-person payment",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4"
+  }
+}
