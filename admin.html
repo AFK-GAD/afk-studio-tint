@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AFK Studio — Appointments</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+  .admin-gate { max-width: 360px; margin: 120px auto; text-align: center; }
+  .admin-gate .input { margin-bottom: 12px; }
+  .admin-table-wrap { overflow-x: auto; border: 1px solid var(--smoke); border-radius: 10px; }
+  table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  table.admin-table th, table.admin-table td {
+    padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--smoke); white-space: nowrap;
+  }
+  table.admin-table th {
+    font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--chrome); background: var(--charcoal);
+  }
+  table.admin-table tr:last-child td { border-bottom: none; }
+  .status-pill {
+    display: inline-block; padding: 3px 10px; border-radius: 20px; font-family: var(--mono);
+    font-size: 0.72rem; text-transform: uppercase;
+  }
+  .status-pending_in_person { background: rgba(232,163,61,0.15); color: #e8a33d; }
+  .status-paid { background: rgba(78,161,255,0.15); color: var(--ceramic); }
+  .status-cancelled { background: rgba(232,87,75,0.15); color: var(--danger); }
+  .row-actions { display: flex; gap: 6px; }
+  .row-actions button {
+    font-family: var(--mono); font-size: 0.7rem; padding: 5px 9px; border-radius: 6px;
+    border: 1px solid var(--smoke); background: var(--charcoal); color: var(--bone); cursor: pointer;
+  }
+  .row-actions button:hover { border-color: var(--chrome); }
+  .admin-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .admin-refresh { font-family: var(--mono); font-size: 0.78rem; color: var(--chrome); background: none; border: 1px solid var(--smoke); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="gateView" class="admin-gate">
+  <h2>AFK Studio</h2>
+  <p class="hint" style="margin-bottom: 20px;">Enter the admin password to view appointments.</p>
+  <input type="password" id="adminPassword" class="input" placeholder="Password" />
+  <button class="btn btn-primary" id="unlockBtn" style="width: 100%;">View appointments</button>
+  <p class="wizard-error" id="gateError"></p>
+</div>
+
+<div id="dashView" class="admin-wrap" style="display: none;">
+  <div class="admin-header">
+    <h2 style="margin: 0;">Appointments</h2>
+    <button class="admin-refresh" id="refreshBtn">Refresh</button>
+  </div>
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Date</th><th>Time</th><th>Customer</th><th>Phone</th><th>Email</th>
+          <th>Vehicle</th><th>Package</th><th>VLT</th><th>Price</th><th>Status</th><th>Notes</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="bookingsBody">
+        <tr><td colspan="12" class="hint">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>
